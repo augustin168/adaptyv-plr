@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "adaptyv-plr"
+version = "0.1.0"
+description = "Sim-first PyLabRobot environment for a Hamilton STAR / STARlet"
+requires-python = ">=3.10"
+dependencies = ["pylabrobot==1.0.0b1"]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["tests", "scripts"]
+addopts = "-p no:cacheprovider"
+# DeprecationWarnings attributed to OUR package are errors: a deprecated kwarg such as `rails=`
+# or a deprecated import shim such as `pylabrobot.liquid_handling` used from adaptyv_plr.
+# tests/conftest.py additionally catches warnings attributed to a PyLabRobot frame deeper in a
+# call chain that started in our code (stack inspection).
+filterwarnings = [
+  "error::DeprecationWarning:adaptyv_plr.*",
+]
