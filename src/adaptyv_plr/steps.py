@@ -51,9 +51,11 @@ class SingleChannelTransfer:
     if not ledger.has_tip(tip_spot):
       problems.append(f"no tip at {self.tip_rack}:{self.tip_well} (exhausted or already used)")
     else:
-      tip_max_ul = float(tip_spot.get_tip().maximal_volume)
-      if self.volume_ul > tip_max_ul:
-        problems.append(f"volume_ul {self.volume_ul} exceeds tip max {tip_max_ul}")
+      # Rated (nominal) volume, e.g. 300 uL for a "300uL" rack. `maximal_volume` (400 uL) is the
+      # physical limit incl. headroom and must not be used as the allowed volume.
+      tip_rated_ul = float(tip_spot.get_tip().nominal_volume)
+      if self.volume_ul > tip_rated_ul:
+        problems.append(f"volume_ul {self.volume_ul} exceeds tip rated volume {tip_rated_ul}")
 
     available_ul = ledger.volume_ul(src)
     if self.volume_ul > available_ul:

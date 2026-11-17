@@ -34,7 +34,8 @@ async def visualize(
     resource=resource, host=host, ws_port=ws_port, fs_port=fs_port, open_browser=open_browser
   )
   await vis.setup()
-  log.info("Visualizer at http://%s:%d/", host, fs_port)
+  # PLR falls back to the next free port if fs_port is busy; vis.fs_port is the real one.
+  log.info("Visualizer at http://%s:%d/", vis.host, vis.fs_port)
   try:
     yield vis
   finally:

@@ -54,6 +54,24 @@ def test_tip_reuse_rejected():
   _assert_rejected([transfer(10.0, tip_well="A1"), transfer(10.0, tip_well="A1")], "step 2.*no tip")
 
 
+def test_volume_above_tip_rated_volume_rejected():
+  # 300 uL tips report maximal_volume 400; 350 uL must still be rejected (rated 300).
+  # Source start volume is raised so the overdraw check cannot be what rejects it.
+  lh, config, calls = _lh_with_spies()
+  well(lh, deck_mod.SOURCE_PLATE_NAME, "A1").tracker.set_volume(360)
+  with pytest.raises(PreflightError, match="tip rated volume 300"):
+    asyncio.run(Pipeline(steps=[transfer(350.0)]).run(lh, num_channels=config.channels))
+  assert calls == []
+
+
+def test_volume_equal_to_tip_rated_volume_allowed():
+  config = RunConfig(machine="starlet")
+  lh = make_liquid_handler(config)
+  well(lh, deck_mod.SOURCE_PLATE_NAME, "A1").tracker.set_volume(300)
+  asyncio.run(Pipeline(steps=[transfer(300.0)]).run(lh, num_channels=config.channels))
+  assert well(lh, deck_mod.DEST_PLATE_NAME, "A1").tracker.get_used_volume() == pytest.approx(300.0)
+
+
 def test_channel_out_of_range_for_starlet():
   _assert_rejected([transfer(10.0, channel=8)], "channel 8 out of range for 8")
 

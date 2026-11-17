@@ -79,3 +79,10 @@ Format: see `.claude/skills/decision-log/SKILL.md`. Newest at the bottom.
 - **Made by:** agent unreviewed
 - **Verified:** Fresh venv + `pip install -e ".[dev]"` + `pytest -q` -> 42 passed, 1 xfailed. Headless demo exit 0 on star (16 ch) and starlet (8 ch). `--viz --no-browser --delay 2`: curl -> HTTP 200 during the run. Live path raises LiveModeNotAllowed; the hook blocked my live-flag and env-var commands in this session. Injected deprecated names make tests fail. grep: only compat.py imports pylabrobot.
 - **NOT verified / limits:** Visualizer rendering in a browser not looked at. Hook not run on Windows. Nothing checked against the physical STAR (reach, collisions, liquid classes, firmware, channel count, deck layout).
+
+### 2026-11-17 23:57 — Bug fix: preflight tip-volume limit uses rated volume
+- **Decision:** `SingleChannelTransfer.preflight` compares volume_ul to the tip's `nominal_volume` (300 uL for the 300uL rack), not `maximal_volume` (400 uL).
+- **Alternatives:** Keep maximal_volume (rejected: lets a 350 uL transfer pass with 300 uL tips; found by reading the 400 in the sim output).
+- **Made by:** agent unreviewed
+- **Verified:** New tests in tests/test_preflight.py: 350 uL rejected, 300 uL allowed; the rejection test fails on the old code. 44 passed, 1 xfailed.
+- **NOT verified / limits:** Assumes "nominal" is the right limit for our liquid and tip type; confirm with the lab. Same commit: the Visualizer now logs the real port when 1337 is busy (verified by occupying 1337).
